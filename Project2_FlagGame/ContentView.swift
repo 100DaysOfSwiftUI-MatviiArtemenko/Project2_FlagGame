@@ -52,6 +52,7 @@ struct ContentView: View {
     
     @State private var rotatingAngle = 0.0
     @State private var showAlert = false
+    @State private var showAnswers = false
     
     @State var i = 0
     
@@ -95,13 +96,24 @@ struct ContentView: View {
                         
                         Button {
                             withAnimation(.easeInOut(duration: 1.5)){
-                                rotatingAngle += 360
                                 flagTaped(number)
+                                showAnswers = true
+                                rotatingAngle += 360
+
                             }
                         } label: {
                             FlagImage(image: Image(countries[number]))
                         }
-                        .rotation3DEffect(.degrees(rotatingAngle) , axis: (x: 0, y:1 , z: 0))
+                        .rotation3DEffect(.degrees(number == correctAnswer ? rotatingAngle : 0.0) , axis: (x: 0, y:1 , z: 0))
+                        .background {
+                            if showAnswers {
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(number == correctAnswer ? .green : .pink)
+                                    .blur(radius: 10)
+                            }
+                        }
+                        
+                        
                         
                     }
                     
@@ -148,7 +160,7 @@ struct ContentView: View {
             if  number == correctAnswer {
                 playerScore += 1
                 scoreTitle = "Correct"
-                
+                                
             }else{
                 scoreTitle = "Wrong, this is \(countries[number])"
             }
@@ -160,14 +172,20 @@ struct ContentView: View {
             if  number == correctAnswer {
                 playerScore += 1
                 scoreTitle = "Correct"
+            } else {
+                scoreTitle = "Wrong, this is \(countries[number])"
             }
             showAlert.toggle()
         }
     }
     
     func askQuestion () {
-        countries.shuffle()
-        correctAnswer = Int.random(in: 0...2)
+        withAnimation(.easeInOut(duration: 1.5)) {
+            showAnswers = false
+            countries.shuffle()
+        }
+            correctAnswer = Int.random(in: 0...2)
+        
     }
     
     func reset (){
